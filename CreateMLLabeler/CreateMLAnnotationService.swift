@@ -33,14 +33,10 @@ class CreateMLAnnotationService {
             //Sometimes they want file:// prefix...
             let jsonStr = try String(contentsOfFile: dir.path + "/annotations.json", encoding: .utf8)
             if let jsonData = jsonStr.data(using: .utf8) {
-                if let jsonObj:[Any] = (try? JSONSerialization.jsonObject(with: jsonData, options:.mutableContainers) as? [Any]) {
-                    for subObj in jsonObj {
-                        if let subObjData = try? JSONSerialization.data(withJSONObject: subObj, options: []) {
-                            let imageFileEntry = try JSONDecoder().decode(CreateMLFileEntry.self, from: subObjData)
-                            print("Successfully parsed: \(imageFileEntry.imagefilename)")
-                            self.mlFiles[imageFileEntry.imagefilename] = imageFileEntry
-                        }
-                    }
+                let fileObjs:[CreateMLFileEntry] = try JSONDecoder().decode([CreateMLFileEntry].self, from: jsonData)
+                for fileObj in fileObjs {
+                    print("Successfully parsed: \(fileObj.imagefilename)")
+                    self.mlFiles[fileObj.imagefilename] = fileObj
                 }
             }
         }
