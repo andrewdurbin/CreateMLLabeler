@@ -23,6 +23,8 @@
 import Foundation
 
 class CreateMLAnnotationService {
+    let annotationFilename = "annotations.json"
+    
     var mlFiles:[String:CreateMLFileEntry] = [:]
     
     init(){
@@ -31,7 +33,7 @@ class CreateMLAnnotationService {
     func readFile(dir:URL) {
         do {
             //Sometimes they want file:// prefix...
-            let jsonStr = try String(contentsOfFile: dir.path + "/annotations.json", encoding: .utf8)
+            let jsonStr = try String(contentsOfFile: dir.path + "/" + self.annotationFilename, encoding: .utf8)
             if let jsonData = jsonStr.data(using: .utf8) {
                 let fileObjs:[CreateMLFileEntry] = try JSONDecoder().decode([CreateMLFileEntry].self, from: jsonData)
                 for fileObj in fileObjs {
@@ -41,7 +43,7 @@ class CreateMLAnnotationService {
             }
         }
         catch {
-            print("unable to read in annotations.json: \(error)")
+            print("unable to read in \(self.annotationFilename): \(error)")
         }
     }
     func writeFile(dir:URL) {
@@ -60,7 +62,7 @@ class CreateMLAnnotationService {
         }
         jsonStr += "]"
         do {
-            let path = "file://" + dir.path + "/annotations.json"
+            let path = "file://" + dir.path + "/" + self.annotationFilename
             try jsonStr.write(to: URL(string:path)!, atomically: true, encoding: .utf8)
         } catch {
             print(error)
