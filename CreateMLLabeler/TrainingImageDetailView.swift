@@ -30,12 +30,24 @@ struct TrainingImageDetailView: View {
     @State var startPoint:CGPoint = CGPoint()
     @State var endPoint:CGPoint = CGPoint()
     @State var newAnnotationLabel:String = ""
+    @State var rect:CGRect = CGRect(x: 0, y: 0, width: 0, height: 0)
     
     func onDeleteAnnotation(at offsets: IndexSet) {
         //todo also delete from observable (self.file)
         self.jsonService.removeAnnotation(forFilename: file.annotationFileEntry.imagefilename, atOffsets: offsets)
         self.file.annotationFileEntry = self.jsonService.getAnnotationsForFile(filename: self.file.annotationFileEntry.imagefilename)
         self.jsonService.writeFile(dir: self.file.dir)
+    }
+    
+    func buildRectFrom(startPoint:CGPoint, endPoint:CGPoint) -> CGRect {
+        let minX = min(startPoint.x,endPoint.x)
+        let minY = min(startPoint.y,endPoint.y)
+        let maxX = max(startPoint.x, endPoint.x)
+        let maxY = max(startPoint.y, endPoint.y)
+        let originPt = CGPoint(x:minX, y:minY)
+        let size = CGSize(width:(maxX-minX), height:(maxY-minY))
+        let rect:CGRect = CGRect(origin: originPt, size: size);
+        return rect
     }
     
     var body: some View {
@@ -54,13 +66,18 @@ struct TrainingImageDetailView: View {
             Image(uiImage: UIImage(data:file.imageData) ?? UIImage())
                 .overlay(
                     GeometryReader { (geometry: GeometryProxy) in
-                        //ForEach(self.file.annotationFileEntry.annotation, id:\.self) { anno in
                         ForEach(Array(zip(self.file.annotationFileEntry.annotation.indices, self.file.annotationFileEntry.annotation)), id: \.0) { index, anno in
                             TrainingAnnotationView(annotation: anno, imageSize: file.imageSize)
                         }
+                        RectOverlayView(rect: self.rect)
                     }
                 )
-                .simultaneousGesture(DragGesture(minimumDistance: 0)
+                .simultaneousGesture(DragGesture(minimumDistance: 20)
+                    .onChanged({
+                        let start = $0.startLocation
+                        let end = $0.predictedEndLocation
+                        self.rect = buildRectFrom(startPoint: start, endPoint: end)
+                    })
                     .onEnded({
                         print("annotation gesture ended: \($0)")
                         self.startPoint = $0.startLocation
@@ -80,6 +97,7 @@ struct TrainingImageDetailView: View {
                         HStack {
                             Button("Cancel") {
                                 showLabelInput = false
+                                self.rect = CGRect(x: 0, y: 0, width: 0, height: 0)
                             }
                             Button("Ok") {
                                 saveNewAnnotation()
@@ -96,19 +114,16 @@ struct TrainingImageDetailView: View {
     
     func saveNewAnnotation() {
         let newLabel = self.newAnnotationLabel
-        let startPoint = self.startPoint
-        let endPoint = self.endPoint
-        let minX = min(startPoint.x,endPoint.x)
-        let minY = min(startPoint.y,endPoint.y)
-        let maxX = max(startPoint.x, endPoint.x)
-        let maxY = max(startPoint.y, endPoint.y)
-        let originPt = CGPoint(x:minX, y:minY)
-        let size = CGSize(width:(maxX-minX), height:(maxY-minY))
-        let rect:CGRect = CGRect(origin: originPt, size: size);
+        let rect:CGRect = buildRectFrom(startPoint: self.startPoint, endPoint: self.endPoint)
+        self.rect = rect
+        let originPt:CGPoint = rect.origin
         let newAnnotation = CreateMLFileAnnotation(coordinates:CreateMLAnnotationCoordinate(y: originPt.y, x: originPt.x, height: rect.height, width: rect.width), label:newLabel)
         self.jsonService.addAnnotation(forFilename: self.file.annotationFileEntry.imagefilename, newAnnotation: newAnnotation)
         self.file.annotationFileEntry.annotation.append(newAnnotation)
         self.jsonService.writeFile(dir: self.file.dir)
+        
+        //now reset it
+        self.rect = CGRect(x: 0, y: 0, width: 0, height: 0)
     }
 }
 

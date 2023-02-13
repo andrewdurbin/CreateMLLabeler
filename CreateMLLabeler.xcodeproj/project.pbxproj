@@ -20,6 +20,7 @@
 		49702A882988CF5400112933 /* FileListing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49702A872988CF5300112933 /* FileListing.swift */; };
 		49702A8A298E129B00112933 /* TrainingAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49702A89298E129A00112933 /* TrainingAnnotationView.swift */; };
 		49702A8C298E146600112933 /* TrainingImageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49702A8B298E146600112933 /* TrainingImageDetailView.swift */; };
+		49D6C123299AF28E00EE77A4 /* RectOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D6C122299AF28E00EE77A4 /* RectOverlayView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 		49702A872988CF5300112933 /* FileListing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListing.swift; sourceTree = "<group>"; };
 		49702A89298E129A00112933 /* TrainingAnnotationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingAnnotationView.swift; sourceTree = "<group>"; };
 		49702A8B298E146600112933 /* TrainingImageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingImageDetailView.swift; sourceTree = "<group>"; };
+		49D6C122299AF28E00EE77A4 /* RectOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RectOverlayView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 				49702A8B298E146600112933 /* TrainingImageDetailView.swift */,
 				492660942991B7650037066F /* CreateML.swift */,
 				492660962991B7B40037066F /* CreateMLAnnotationService.swift */,
+				49D6C122299AF28E00EE77A4 /* RectOverlayView.swift */,
 			);
 			path = CreateMLLabeler;
 			sourceTree = "<group>";
@@ -285,6 +288,7 @@
 				49702A5B2988B3D400112933 /* CreateMLLabelerApp.swift in Sources */,
 				492660952991B7650037066F /* CreateML.swift in Sources */,
 				49702A8C298E146600112933 /* TrainingImageDetailView.swift in Sources */,
+				49D6C123299AF28E00EE77A4 /* RectOverlayView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
