@@ -24,6 +24,8 @@ import SwiftUI
 
 struct ContentView: View {
     @State var showDirectoryPicker:Bool = false
+    @State var showErrorSheet:Bool = false
+    @State var importError:String = ""
     @State var dirPath:URL = URL(string:"file:///")!
     @State var fileURLs:[URL] = []
     
@@ -47,9 +49,19 @@ struct ContentView: View {
         .sheet(isPresented: self.$showDirectoryPicker) {
             DocumentPicker(dirPath: self.$dirPath, files: self.$fileURLs)
         }
+        .alert(isPresented: self.$showErrorSheet) {
+            Alert(title: Text("Import Error"),
+                  message: Text("""
+                    \(self.importError)
+                    """),
+                  dismissButton: .default(Text("Dismiss")))
+        }
         .onChange(of: self.showDirectoryPicker) { newValue in
             if newValue == false {
-                service.loadWithURLs(dirPath: self.dirPath, jsonService:self.jsonService)
+                self.importError = service.loadWithURLs(dirPath: self.dirPath, jsonService:self.jsonService)
+                if self.importError != "" {
+                    self.showErrorSheet = true
+                }
             }
         }
     }

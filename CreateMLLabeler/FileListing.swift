@@ -62,29 +62,37 @@ class FileListingService: ObservableObject {
         return ["png","jpg","jpeg"]
     }
     
-    func loadWithURLs(dirPath:URL, jsonService:CreateMLAnnotationService) -> Void {
+    func loadWithURLs(dirPath:URL, jsonService:CreateMLAnnotationService) -> String {
         self.files = []
+        var items:[String] = []
         jsonService.readFile(dir: dirPath)
         let filemgr = FileManager.default
         do {
-            let items = try filemgr.contentsOfDirectory(atPath: dirPath.path)
-            let allowedTypes = self.getImageTypes()
-            for item in items {
-                let filenameParts = item.split(separator: ".")
-                if filenameParts.count < 2 {
-                    continue;
-                }
-                let ext = String(filenameParts.last!)
-                if allowedTypes.contains(ext) {
-                    let annotationsFileEntry = jsonService.getAnnotationsForFile(filename: item)
-                    for annotation in annotationsFileEntry.annotation {
-                        print("Image \(annotationsFileEntry.imagefilename) has annotation with label \(annotation.label)")
-                    }
-                    self.files.append(FileListing(url:URL(string:item)!, dir:dirPath, annotationFileEntry: annotationsFileEntry))
-                }
-            }
+            items = try filemgr.contentsOfDirectory(atPath: dirPath.path)
         } catch {
             // failed to read directory – bad permissions, perhaps?
+            return error.localizedDescription
         }
+        
+        let allowedTypes = self.getImageTypes()
+        let images = items.filter { filename in
+            let filenameParts = filename.split(separator: ".")
+            if filenameParts.count < 2 {
+                return false
+            }
+            let ext = String(filenameParts.last!)
+            return allowedTypes.contains(ext)
+        }
+        if images.isEmpty {
+            return "No images found in directory, supported extensions: \(allowedTypes.joined(separator: ", "))"
+        }
+        for item in images {
+            let annotationsFileEntry = jsonService.getAnnotationsForFile(filename: item)
+            for annotation in annotationsFileEntry.annotation {
+                print("Image \(annotationsFileEntry.imagefilename) has annotation with label \(annotation.label)")
+            }
+            self.files.append(FileListing(url:URL(string:item)!, dir:dirPath, annotationFileEntry: annotationsFileEntry))
+        }
+        return ""
     }
 }
